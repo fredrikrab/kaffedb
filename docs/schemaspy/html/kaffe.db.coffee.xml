@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="../kaffe.db" schema="coffee" type="SQLite - 3.36.0">
+   <tables>
+      <table name="batches" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="batch_id" nullable="true" remarks="" size="2000000000" type="INTEGER" typeCode="4">
+            <child column="batch_id" foreignKey="" implied="false" onDeleteCascade="true" table="beans_in_batch"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="1" name="coffee_id" nullable="false" remarks="" size="2000000000" type="INTEGER" typeCode="4">
+            <parent column="coffee_id" foreignKey="" implied="false" onDeleteCascade="true" table="coffee"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="2" name="roastery_name" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <parent column="roastery_name" foreignKey="" implied="false" onDeleteCascade="true" table="roasteries"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="3" name="farm_name" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <parent column="farm_name" foreignKey="" implied="false" onDeleteCascade="true" table="farms"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="4" name="refinement_name" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <parent column="refinement_name" foreignKey="" implied="false" onDeleteCascade="true" table="refinement_methods"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="5" name="harvest_year" nullable="false" remarks="" size="2000000000" type="INTEGER" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="6" name="kilo_price_usd" nullable="false" remarks="" size="2000000000" type="REAL" typeCode="6"/>
+         <primaryKey column="batch_id" sequenceNumberInPK="1"/>
+         <index name="batches_s_pk" unique="true">
+            <column ascending="true" name="batch_id"/>
+         </index>
+         <index name="sqlite_autoindex_batches_1" unique="true">
+            <column ascending="true" name="coffee_id"/>
+         </index>
+      </table>
+      <table name="beans_in_batch" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="batch_id" nullable="false" remarks="" size="2000000000" type="INTEGER" typeCode="4">
+            <parent column="batch_id" foreignKey="" implied="false" onDeleteCascade="true" table="batches"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="1" name="bean_type" nullable="false" remarks="" size="2000000000" type="VARCHAR(8)" typeCode="12">
+            <parent column="bean_type" foreignKey="" implied="false" onDeleteCascade="true" table="coffee_beans"/>
+         </column>
+         <primaryKey column="batch_id" sequenceNumberInPK="1"/>
+         <primaryKey column="bean_type" sequenceNumberInPK="2"/>
+         <index name="beans_in_batch_s_pk" unique="true">
+            <column ascending="true" name="batch_id"/>
+            <column ascending="true" name="bean_type"/>
+         </index>
+         <index name="sqlite_autoindex_beans_in_batch_1" unique="true">
+            <column ascending="true" name="batch_id"/>
+            <column ascending="true" name="bean_type"/>
+         </index>
+      </table>
+      <table name="coffee" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="coffee_id" nullable="true" remarks="" size="2000000000" type="INTEGER" typeCode="4">
+            <child column="coffee_id" foreignKey="" implied="false" onDeleteCascade="true" table="batches"/>
+            <child column="coffee_id" foreignKey="" implied="false" onDeleteCascade="false" table="reviews"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="1" name="coffee_name" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="2" name="coffee_description" nullable="false" remarks="" size="2000000000" type="TEXT" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="3" name="kilo_price_nok" nullable="false" remarks="" size="2000000000" type="REAL" typeCode="6"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="4" name="roast_degree" nullable="true" remarks="" size="2000000000" type="VARCHAR(7)" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="5" name="roast_date" nullable="false" remarks="" size="2000000000" type="DATE" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="6" name="roastery_name" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <parent column="roastery_name" foreignKey="" implied="false" onDeleteCascade="false" table="roasteries"/>
+         </column>
+         <primaryKey column="coffee_id" sequenceNumberInPK="1"/>
+         <index name="coffee_s_pk" unique="true">
+            <column ascending="true" name="coffee_id"/>
+         </index>
+         <index name="sqlite_autoindex_coffee_1" unique="true">
+            <column ascending="true" name="coffee_name"/>
+            <column ascending="true" name="roastery_name"/>
+         </index>
+      </table>
+      <table name="coffee_beans" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="bean_type" nullable="true" remarks="" size="2000000000" type="VARCHAR(8)" typeCode="12">
+            <child column="bean_type" foreignKey="" implied="false" onDeleteCascade="true" table="beans_in_batch"/>
+            <child column="bean_type" foreignKey="" implied="false" onDeleteCascade="true" table="farm_cultivate_beans"/>
+         </column>
+         <primaryKey column="bean_type" sequenceNumberInPK="1"/>
+         <index name="coffee_beans_s_pk" unique="true">
+            <column ascending="true" name="bean_type"/>
+         </index>
+         <index name="sqlite_autoindex_coffee_beans_1" unique="true">
+            <column ascending="true" name="bean_type"/>
+         </index>
+      </table>
+      <table name="farm_cultivate_beans" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="farm_name" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <parent column="farm_name" foreignKey="" implied="false" onDeleteCascade="true" table="farms"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="1" name="bean_type" nullable="false" remarks="" size="2000000000" type="VARCHAR(8)" typeCode="12">
+            <parent column="bean_type" foreignKey="" implied="false" onDeleteCascade="true" table="coffee_beans"/>
+         </column>
+         <primaryKey column="bean_type" sequenceNumberInPK="1"/>
+         <primaryKey column="farm_name" sequenceNumberInPK="2"/>
+         <index name="farm_cultivate_beans_s_pk" unique="true">
+            <column ascending="true" name="bean_type"/>
+            <column ascending="true" name="farm_name"/>
+         </index>
+         <index name="sqlite_autoindex_farm_cultivate_beans_1" unique="true">
+            <column ascending="true" name="farm_name"/>
+            <column ascending="true" name="bean_type"/>
+         </index>
+      </table>
+      <table name="farms" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="farm_name" nullable="true" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <child column="farm_name" foreignKey="" implied="false" onDeleteCascade="true" table="batches"/>
+            <child column="farm_name" foreignKey="" implied="false" onDeleteCascade="true" table="farm_cultivate_beans"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="1" name="elevation" nullable="true" remarks="" size="2000000000" type="INTEGER" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="2" name="farm_country" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="3" name="region" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12"/>
+         <primaryKey column="farm_name" sequenceNumberInPK="1"/>
+         <index name="farms_s_pk" unique="true">
+            <column ascending="true" name="farm_name"/>
+         </index>
+         <index name="sqlite_autoindex_farms_1" unique="true">
+            <column ascending="true" name="farm_name"/>
+         </index>
+      </table>
+      <table name="refinement_methods" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="refinement_name" nullable="true" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <child column="refinement_name" foreignKey="" implied="false" onDeleteCascade="true" table="batches"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="1" name="refinement_description" nullable="false" remarks="" size="2000000000" type="TEXT" typeCode="12"/>
+         <primaryKey column="refinement_name" sequenceNumberInPK="1"/>
+         <index name="refinement_methods_s_pk" unique="true">
+            <column ascending="true" name="refinement_name"/>
+         </index>
+         <index name="sqlite_autoindex_refinement_methods_1" unique="true">
+            <column ascending="true" name="refinement_name"/>
+         </index>
+      </table>
+      <table name="reviews" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="review_id" nullable="true" remarks="" size="2000000000" type="INTEGER" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="1" name="user_email" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <parent column="user_email" foreignKey="" implied="false" onDeleteCascade="false" table="users"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="2" name="coffee_id" nullable="false" remarks="" size="2000000000" type="INTEGER" typeCode="4">
+            <parent column="coffee_id" foreignKey="" implied="false" onDeleteCascade="false" table="coffee"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="3" name="date_time" nullable="false" remarks="" size="2000000000" type="DATE" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="4" name="rating" nullable="true" remarks="" size="2000000000" type="INTEGER" typeCode="4"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="5" name="note" nullable="true" remarks="" size="2000000000" type="TEXT" typeCode="12"/>
+         <primaryKey column="review_id" sequenceNumberInPK="1"/>
+         <index name="reviews_s_pk" unique="true">
+            <column ascending="true" name="review_id"/>
+         </index>
+         <index name="sqlite_autoindex_reviews_1" unique="true">
+            <column ascending="true" name="user_email"/>
+            <column ascending="true" name="coffee_id"/>
+            <column ascending="true" name="date_time"/>
+         </index>
+      </table>
+      <table name="roasteries" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="roastery_name" nullable="true" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <child column="roastery_name" foreignKey="" implied="false" onDeleteCascade="true" table="batches"/>
+            <child column="roastery_name" foreignKey="" implied="false" onDeleteCascade="false" table="coffee"/>
+         </column>
+         <primaryKey column="roastery_name" sequenceNumberInPK="1"/>
+         <index name="roasteries_s_pk" unique="true">
+            <column ascending="true" name="roastery_name"/>
+         </index>
+         <index name="sqlite_autoindex_roasteries_1" unique="true">
+            <column ascending="true" name="roastery_name"/>
+         </index>
+      </table>
+      <table name="users" remarks="" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="10" id="0" name="user_email" nullable="true" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12">
+            <child column="user_email" foreignKey="" implied="false" onDeleteCascade="false" table="reviews"/>
+         </column>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="1" name="password" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="2" name="user_name" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="10" id="3" name="user_country" nullable="false" remarks="" size="2000000000" type="VARCHAR(255)" typeCode="12"/>
+         <primaryKey column="user_email" sequenceNumberInPK="1"/>
+         <index name="users_s_pk" unique="true">
+            <column ascending="true" name="user_email"/>
+         </index>
+         <index name="sqlite_autoindex_users_1" unique="true">
+            <column ascending="true" name="user_email"/>
+         </index>
+      </table>
+   </tables>
+</database>

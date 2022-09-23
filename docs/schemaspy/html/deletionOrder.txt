@@ -1,0 +1,10 @@
+reviews
+farm_cultivate_beans
+beans_in_batch
+batches
+coffee
+users
+refinement_methods
+roasteries
+farms
+coffee_beans

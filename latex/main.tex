@@ -1,0 +1,40 @@
+\input{config}
+
+\begin{document}
+
+% Front page
+\include{front_page}
+
+% Table of contents
+\renewcommand{\contentsname}{Innholdsfortegnelse}
+\tableofcontents
+\thispagestyle{empty}
+
+% Some settings
+\setcounter{page}{2}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+
+% Exercises
+\include{exercise/a}
+\include{exercise/b}
+\include{exercise/c}
+
+% SQL script
+\section{SQL-script}
+\fancyfoot[C]{}
+
+\lstinputlisting[
+    language=SQL,
+    framextopmargin=1.5em,
+    framexleftmargin=1.5em,
+    framexrightmargin=1.5em,
+    framexbottommargin=1.5em,
+    xleftmargin=-2.0em,
+    xrightmargin=-2.0em,
+    frame=single
+    ]
+{../sql/create_tables.sql}
+
+\end{document}

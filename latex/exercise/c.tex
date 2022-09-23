@@ -1,0 +1,144 @@
+\section{Brukerhistorier}
+
+\subsection{Brukerhistorie 1}
+
+\begin{tabular}{ | p{0.95\textwidth} }
+    \textsl{En bruker smaker kaffen Vinterkaffe 2022 fra Trondheims-brenneriet Jacobsen \& Svart (brent 20.01.2022), gir den 10 poeng og skriver «Wow – en odyssé for smaksløkene: sitrusskall, melkesjokolade, aprikos!».
+    Kaffen er lysbrent, bærtørket Bourbon (c. arabica), kommer fra gården Nombre de Dios (1500 moh.) i Santa Ana, El Salvador, har en kilopris på 600 kr og er ifølge brenneriet «En velsmakende og kompleks kaffe for mørketiden».
+    Kaffen ble høstet i 2021 og gården fikk utbetalt 8 USD per kg kaffe.
+    Input fra brukerens side er brenneri, kaffenavn, poeng og smaksnotat.}
+\end{tabular} \\
+
+Gitt opplysningene har vi følgende informasjon i \class{coffee}-tabellen:
+
+\sqltable{coffee} \\
+
+Brukerens input skal skrives til \class{reviews}-tabellen som har disse kolonnene:
+
+\sqlcolumns{reviews}
+
+
+\verb|user_email| tilsvarer brukerens epost-adresse (primærnøkkel i \class{users}-tabellen).
+Vi antar at dette kan hentes fra innsendingsskjemaet (f.eks. fordi brukeren er logget på systemet).
+Ettersom smakstidspunkt ikke er oppgitt, settes \verb|date_time| til nåtid av databasesystemet. Poengsum og smaksnotat hentes fra input.
+
+Da gjenstår det å hente primærnøkkelen til "Vinterkaffe 2022" fra tabellen for kaffetyper (\textbf{coffee.}\verb|coffee_id|), slik at \textbf{reviews.}\verb|coffee_id| peker på denne kaffetypen.
+
+Databasesystemet vårt krever at kombinasjonen (kaffenavn, brenneri) er unik,
+altså at det er maks ett tilfelle av en kombinasjon (\verb|coffee_name|, \verb|roastery_name|) i \class{coffee}-tabellen.
+
+Følgende spørring vil derfor gi ønsket \verb|coffee_id|: \\
+
+\begin{lstlisting}[language=SQL]
+    SELECT coffee_id FROM coffee
+    WHERE roastery_name = 'Jacobsen & Svart' AND coffee_name = 'Vinterkaffe 2022';
+\end{lstlisting}
+
+Innsetting i database kan gjøres med: \\
+
+\begin{lstlisting}[language=SQL]
+    INSERT INTO reviews (review_id, user_email, coffee_id, date_time, rating, note)
+    VALUES (
+        null, 'epost@server.no',
+        (SELECT coffee_id FROM coffee WHERE coffee_name == 'Vinterkaffe 2022'),
+        datetime('now'), 10,
+        'Wow - en odyssé for smaksløkene: sitrusskall, melkesjokolade, aprikos!'
+    );
+\end{lstlisting}
+
+\subsection{Brukerhistorie 2}
+
+\begin{tabular}{ | p{0.95\textwidth} }
+    \textsl{En bruker skal kunne få skrevet ut en liste over hvilke brukere som har smakt flest unike kaffer så langt i år, sortert synkende.
+    Listen skal inneholde brukernes fulle navn og antallet kaffer de har smakt.}
+\end{tabular} \\
+
+Vi kan finne antall unike kaffer som brukere har smakt ved å telle rader i \class{reviews}-tabellen med unik (\verb|user_email|, \verb|coffee_id|).
+Tuppelen må være unik siden en bruker kan ha smakt samme kaffe mange ganger.
+Vi kan avgrense tellingen til årets smaker ved å kreve at \verb|date_time| skal være større enn eller lik begynnelsen av året.
+
+Fullt navn hentes fra \class{users}-tabellen via en \code{JOIN}-operasjon.
+Resultatet grupperes etter \verb|user_email| for å skille mellom eventuelle brukere med samme navn. \\
+
+\begin{lstlisting}[language=SQL]
+    SELECT name, count(*)
+    FROM (  SELECT DISTINCT user_email, coffee_id FROM reviews
+            WHERE date_time >= datetime('now', 'start of year') )
+    JOIN users USING(user_email)
+    GROUP BY user_email
+    ORDER BY count(*) DESC;
+    
+\end{lstlisting}
+
+\subsection{Brukerhistorie 3}
+
+\begin{tabular}{ | p{0.95\textwidth} }
+    \textsl{En skal kunne se hvilke kaffer som gir forbrukeren mest for pengene ifølge KaffeDBs brukere (høyeste gjennomsnittsscore kontra pris), sortert synkende.
+    Listen skal inneholde brennerinavn, kaffenavn, pris og gjennomsnittsscore for hver kaffe.}
+\end{tabular} \\
+
+Gjennomsnittsscore beregnes ved å hente rating-verdier fra \class{reviews}-tabellen og gruppere etter kaffetype.
+Resten av opplysningene ligger i \class{coffee}-tabellen som kan skjøtes på med \code{JOIN}.
+Sorteringsnøkkelen kan være gjennomsnittsscore delt på pris.
+
+En spørring kan derfor se slik ut: \\
+
+\begin{lstlisting}[language=SQL]
+    SELECT roastery_name, coffee_name, kilo_price_nok, AVG(rating)
+    FROM (SELECT rating, coffee_id FROM reviews)
+    JOIN coffee USING(coffee_id)
+    GROUP BY coffee_id
+    ORDER BY AVG(rating)/kilo_price_nok DESC;
+\end{lstlisting}
+
+\subsection{Brukerhistorie 4}
+
+\begin{tabular}{ | p{0.95\textwidth} }
+    \textsl{En bruker søker etter kaffer som er blitt beskrevet med ordet «floral», enten av brukere eller brennerier.
+    Brukeren skal få tilbake en liste med brennerinavn og kaffenavn.}
+\end{tabular} \\
+
+Tekstsøk kan gjøres med \code{LIKE '\%floral\%'} i \textbf{reviews.}\verb|note| og \textbf{coffee.}\verb|coffee_description|.\footnote{ Se også \href{https://www.sqlite.org/fts5.html}{SQLite FTS5 Extension} som kan vurderes dersom det etter hvert stilles store krav til ytelse.}
+Samlet liste kan deretter presenteres ved å ta \code{UNION} av resultatene. \\
+
+\begin{lstlisting}[language=SQL]
+    SELECT roastery_name, coffee_name
+    FROM (  SELECT coffee_id FROM reviews
+            WHERE note LIKE '%floral%'  )
+    JOIN coffee USING(coffee_id)
+    UNION
+    SELECT roastery_name, coffee_name FROM coffee
+    WHERE coffee_description LIKE '%floral%';
+\end{lstlisting}
+
+\subsection{Brukerhistorie 5}
+
+\begin{tabular}{ | p{0.95\textwidth} }
+    \textsl{En annen bruker er lei av å bli skuffet av vaskede kaffer og deres tidvis kjedelige smak, og ønsker derfor å søke etter kaffer fra Rwanda og Colombia som ikke er vaskede.
+    Systemet returnerer en liste over brennerinavn og kaffenavn.}
+\end{tabular} \\
+
+Brukeren ønsker å filtrere kaffetyper på henholdsvis land (\textbf{farms.}\verb|farm_country|) og foredlingsmetode (\textbf{refinement\_method.}\verb|refinement_name|).
+Denne filtreringen kan i første omgang gjøres med \code{SELECT}, \code{FROM} og \code{WHERE} i de respektive tabellene.
+
+Alle kaffetyper er fremstilt fra et bestemt parti med kaffebønner, som i vår database er representert av tabellen \class{batches}: \\
+
+\sqlcolumns{batches}{}
+
+Siden både gård (\verb|farm_name|) og foredlingsmetode (\verb|refinement_name|) er fremmednøkler i denne tabellen,
+vil en \code{NATURAL JOIN} med tidligere filtrering gi alle parti som matcher brukerens kriterier. 
+
+En videre \code{NATURAL JOIN} med \verb|coffee|-tabellen gir brennerinavn og kaffenavn. \\
+
+\begin{lstlisting}[language=SQL]
+    SELECT roastery_name, coffee_name
+    FROM (
+            SELECT farm_name FROM farms
+            WHERE farm_country IN ('Rwanda', 'Colombia')
+        ), (
+            SELECT refinement_name FROM refinement_methods
+            WHERE refinement_name != 'Vasket'
+        )
+    NATURAL JOIN batches
+    NATURAL JOIN coffee;
+\end{lstlisting}
